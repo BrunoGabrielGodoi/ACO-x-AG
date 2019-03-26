@@ -5,7 +5,8 @@ from deap import creator
 from deap import tools
 
 
-creator.create("solution",base.Fi)
+creator.create("solution",base.Fi)   
+print("oi")
 
 
 
