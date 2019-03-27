@@ -1,3 +1,4 @@
 oi = "tchau "
 tchau = 5
-print(oi * (5 + tchau))
+dic = {1:"a", 2:"b","c":3,"d":"e"}
+print(dic.get("c"))
