@@ -7,7 +7,7 @@ from deap import tools
 
 creator.create("solution",base.Fi)   
 print("oi")
-
+print("eae ")
 
 
 
