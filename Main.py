@@ -1,13 +1,18 @@
-import random
 
-from deap import base
-from deap import creator
-from deap import tools
+class individual:
+    path = ""
+
+    def __init__(self, path):
+        self.path = path
 
 
-creator.create("solution",base.Fitness)   
-print("oi")
-print("eae ")
 
+def main():
+    i1 = individual("4,5,6,7,8")
+    print(i1.path)   
+
+
+
+main()
 
 
