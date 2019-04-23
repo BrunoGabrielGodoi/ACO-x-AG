@@ -11,8 +11,8 @@ class Graph:
 
 
 def Main():
-    Graph = ["A","B","C","D","E","F"]
-    i1 = Individual(pathTest)
+    graph = ["A","B","C","D","E","F"]
+    i1 = Individual(graph)
     print(i1.path[1])   
 
 
