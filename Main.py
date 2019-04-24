@@ -90,6 +90,7 @@ def Fitness(population,graph):
         
         i.SetScore(scoreSum)
     
+        
 
 
 
@@ -108,9 +109,11 @@ def Main():
     graph = Graph(graphSize,graphA)
 
        
-    population = GeneratePopulation(5,graph)
-    #Fitness(population,graph)
-    print(population[2].path)   
+    population = GeneratePopulation(50,graph)
+    Fitness(population,graph)
+
+    print(population[2].score)   
+
    # print(population)
 
 
