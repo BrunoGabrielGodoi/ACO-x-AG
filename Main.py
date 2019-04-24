@@ -2,8 +2,14 @@ import random
 
 class Individual:
 
+    path = []
+    score = 999
+
     def __init__(self, path):
-        self.path = path
+        self.path = path[:]
+    
+    def SetScore(self,x):
+        self.score = x
 
 
 class Graph:
@@ -17,12 +23,15 @@ class Graph:
             return True
         else: 
             return False
+    
+    def ReturnWeight(self,a,b):
+        return self.arestas[a][b]
 
 
 def GeneratePopulation(sizeOfPopulation, graph):
   
     path = [1]
-    population = []  
+    population = [] * sizeOfPopulation  
 
     for i in range(0,sizeOfPopulation):
         j = 1
@@ -51,13 +60,36 @@ def GeneratePopulation(sizeOfPopulation, graph):
                     j = 1
                     ErrorCounter = 0
             j += 1
+         
+        #print(itemp.path,"^^^^^^")
         population.append(Individual(path))
-        print(i,"-",path)
+
         path.clear()
         path.append(1)
+   # print("-",population[1].path)
+    return population
+
+def CleanScore(population):
+
+    for i in population:
+        i.SetScore(9999)
 
     return population
 
+def Fitness(population,graph):
+
+    population = CleanScore(population)
+
+    for i in population:
+        scoreSum = 0
+        j = 0
+        while j < (len(i.path)-1):
+
+            scoreSum += graph.ReturnWeight(i.path[j],i.path[j+1])
+            j += 1
+        
+        i.SetScore(scoreSum)
+    
 
 
 
@@ -76,8 +108,9 @@ def Main():
     graph = Graph(graphSize,graphA)
 
        
-    population = GeneratePopulation(1000,graph)
-    
+    population = GeneratePopulation(5,graph)
+    #Fitness(population,graph)
+    print(population[2].path)   
    # print(population)
 
 
