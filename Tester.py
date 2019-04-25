@@ -338,3 +338,7 @@ graphB = [  [0,1,2 ,3 ,4 ,5 ,6],
             [6,25,19,19,16,28,0], ]
 
 print(len(graphB))
+
+
+f = open("city.txt","w+")
+
