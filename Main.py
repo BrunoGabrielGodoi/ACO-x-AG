@@ -2,18 +2,6 @@ import random
 import operator
 import numpy as np 
 
-sizePop = 50
-killPop = 10
-mutationRate = 0.02
-
-graphSize = 5
-graphA = [  [0,1,2,3,4,5],
-            [1,0,2,0,3,6],
-            [2,2,0,4,3,0],
-            [3,0,4,0,7,3],
-            [4,3,3,7,0,3],
-            [5,6,0,3,3,0] ]
-
 class Individual:
     """ Class of genes."""
 
@@ -28,9 +16,9 @@ class Individual:
         self.score = x
         self.probability = x/sizeOfPop
 
-    def CalculateProbabiility(self):
+    def CalculateProbability(self):
         """ calculate the probability normalized """
-        return self.score/Individual.staticSumofScores
+        return (1/(Individual.staticSumofScores*self.score))
 
     def __repr__(self):
         """print the score when the object is called by print"""
@@ -66,7 +54,7 @@ def GeneratePopulation(sizeOfPopulation, graph):
             ErrorCounter = 0
             while compatible == False:
 
-                temp = random.randint(1, 5) # 0,5 = 1-5
+                temp = random.randint(1, graph.size) # 0,5 = 1-5
                 a = path[-1]
                 ErrorCounter += 1
                 if graph.IsConnected(a,temp):
@@ -74,7 +62,7 @@ def GeneratePopulation(sizeOfPopulation, graph):
                     if temp not in path :
                         path.append(temp)
                         compatible = True
-                    elif len(path) == 5:
+                    elif len(path) == graph.size :
                         path.append(1)
                         compatible = True
 
@@ -123,7 +111,7 @@ def Fitness(population, graph):
     population.sort(key=operator.attrgetter('score'))
 
 
-def Crossover(couple):
+def Crossover(couple,graph):
 
     a = random.randint(1,len(couple[0].path)-4)
     b = random.randint(a+1,len(couple[0].path)-2)
@@ -166,38 +154,121 @@ def Crossover(couple):
 
         i += 1
 
-    print(sonPath)
+    #print(sonPath) # TESTAR SE ESTÀ POSSIVEL
 
-    
+    return(sonPath)
 
-def Reproduce(population):
+def CheckIfPossible(path,graph):
 
+    i=0
+    while i < len(path)-2:
+        if graph.IsConnected(i,i+1):
+            pass
+        else:
+            return False
+        i += 1
+    return True
+
+def SelectCouple(population,graph):
+    """Selects a couple based on the score."""
     roullet = []
 
     for ind in population: 
-        roullet.append(ind.CalculateProbabiility())
+        roullet.append(ind.CalculateProbability())
 
-    Crossover(np.random.choice(population,2,roullet))
+    probSum = sum(roullet)
+
+    for i in range(0,len(roullet)):
+        roullet[i] = roullet[i] / probSum
+    
+    return np.random.choice(population,2,p=roullet)
 
 
+def Mutate(ind,graph):
+    """Decides wether to mutate or not and returns the result mutated or not."""
+    pathBackup = ind.path
+    if np.random.choice([False,True],1,p=[1-mutationRate,mutationRate]):
+        while True:
+            a,b = 0,0
+            ind.path = pathBackup
+            while a == b:
+                a = random.randint(1,len(ind.path)-4)
+                b = random.randint(a+1,len(ind.path)-2)
 
-def Main(sizePop,graphA,graphSize):
+            ind.path[a], ind.path[b] = ind.path[b], ind.path[a] # Melhor coisa <3
+
+            if CheckIfPossible(ind.path,graph):
+                return ind
+    else:
+        return ind
+    
+    
+
+def Reproduce(population,graph):
+
+    i = 1
+    while i <= killPop:
+
+        couple = SelectCouple(population,graph)
+        son    = Individual(Crossover(couple, graph))
+        population.pop(-i)
+        population.append(Mutate(son,graph))
+        i += 1
+        
+        
+def ShowResults(population,n):
+    if n % 100 == 0:
+        print("\nGeneration-----",n,"\nBest ind - ",population[0],"\nWorst ind - ", population[-1])
+        print(population)
+
+
+def Main(sizePop,rawGraph):
     """ Main Pipeline."""
 
 
-    graph = Graph(graphSize,graphA)
+    graph = Graph(len(rawGraph) - 1,rawGraph)
 
        
     population = GeneratePopulation(sizePop,graph)
-    Fitness(population,graph)
-    print(Reproduce(population))
+    i = 0
+    while i <= 1000:
+        if i % 10 == 0:
+            print(".")
+        Fitness(population,graph)
+        ShowResults(population,i)
+        Reproduce(population,graph)
+        i += 1
+        
 
     #print(population[2].score)   
 
    # print(population)
 
 
+# Setings ----------------------------------------------------
+
+sizePop = 300
+killPop = 20
+mutationRate = 0.8
+
+graphA = [  [0,1,2,3,4,5],
+            [1,0,2,0,3,6],
+            [2,2,0,4,3,0],
+            [3,0,4,0,7,3],
+            [4,3,3,7,0,3],
+            [5,6,0,3,3,0] ]
+
+#Best answer found 118
+
+graphB = [  [0,1,2 ,3 ,4 ,5 ,6], 
+            [1,0,24,30,27,17,25],
+            [2,24,0,18,20,23,19],
+            [3,30,18,0,19,32,19],
+            [4,27,20,19,0,32,16],
+            [5,17,23,32,41,0,28],
+            [6,25,19,19,16,28,0], ]
+
 # Start of code -------------------------------------------
-Main(sizePop,graphA,graphSize)
+Main(sizePop,graphB)
 
 
