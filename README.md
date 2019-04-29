@@ -10,3 +10,8 @@ Support links:
  https://www.python.org/downloads/
  
  https://github.com/brulufa9/ACO-x-AG
+
+
+Neuron = https://marketplace.visualstudio.com/items?itemName=neuron.neuron-IPE
+
+sound = pip install playsound

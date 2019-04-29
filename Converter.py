@@ -53,4 +53,4 @@ def ConverttxtToMatrix(nCitys,pathToFile):
 
     print(finalstring)
 
-ConverttxtToMatrix(26,"graph.txt")
+ConverttxtToMatrix(42,"graph.txt")
