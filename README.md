@@ -15,3 +15,4 @@ Support links:
 Neuron = https://marketplace.visualstudio.com/items?itemName=neuron.neuron-IPE
 
 sound = pip install playsound
+numpy = pip install numpy

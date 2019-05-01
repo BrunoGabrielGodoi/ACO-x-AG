@@ -1,11 +1,10 @@
 import random
 import operator
 import numpy as np 
-import profilehooks as profile
 import time as time
 from playsound import playsound
 
-mm,rm = ""
+mm,rm = "", ""
 
 class Individual:
     """ Class of genes."""
@@ -123,7 +122,7 @@ def Fitness(population, graph):
 
 def CrossoverMPX(couple,graph):
     """Crossover a couple of inds using the MPX technique"""
-    rm = "MPX"
+    #rm = "MPX"
     a = random.randint(1,len(couple[0].path)-3)
     b = random.randint(a+1,len(couple[0].path)-2)
     dad1 = random.randint(0,1)
@@ -169,7 +168,7 @@ def CrossoverMPX(couple,graph):
 
 def CrossoverOX(couple,graph):
     """Crossover a couple of inds using the OX technique"""
-    rm = "OX"
+    #rm = "OX"
     #Get strand size
     a = random.randint(1,len(couple[0].path)-3)
     b = random.randint(a+1,len(couple[0].path)-2)
@@ -220,10 +219,11 @@ def CheckIfPossible(path,graph):
         i += 1
     return True
 
-def SelectCouple(population,graph):
+def SelectCouple(population,graph,gen):
     """Selects a couple based on the score."""
     roullet = []
-
+    couple = []
+    couplef = []
     for ind in population: 
         roullet.append(ind.CalculateProbability())
 
@@ -232,12 +232,19 @@ def SelectCouple(population,graph):
     for i in range(0,len(roullet)):
         roullet[i] = roullet[i] / probSum
     
-    return np.random.choice(population,2,p=roullet)
+    if gen % 10 == 0:
+        couple.append(np.random.choice(population,2,p=roullet))
+        couplef.append(couple[0][0])
+        couple.append(np.random.choice(population,2,p=list(reversed(roullet))))
+        couplef.append(couple[1][0])
+        return couplef
+    else:
+        return  np.random.choice(population,2,p=roullet)
 
 
 def MutateThrors(ind,graph):
     """Decides wether to mutate or not and returns the result mutated or not, using the Thrors tecnique."""
-    mm = "Thrors"
+     #mm = "Thrors"
     pathBackup = ind.path
 
     if np.random.choice([False,True],1,p=[1-mutationRate,mutationRate]):
@@ -260,7 +267,7 @@ def MutateThrors(ind,graph):
 
 def MutateNormal(ind,graph):
     """Decides wether to mutate or not and returns the result mutated or not."""
-    mm = "Normal"
+    mm += "Normal"
     pathBackup = ind.path
 
     if np.random.choice([False,True],1,p=[1-mutationRate,mutationRate]):
@@ -282,15 +289,15 @@ def MutateNormal(ind,graph):
     
     
 
-def Reproduce(population,graph):
+def Reproduce(population,graph,gen):
     """Will choose and reproduce the inds in your population"""
     i = 1
     while i <= killPop:
 
-        couple = SelectCouple(population,graph)
-        son    = Individual(CrossoverMPX(couple, graph)) # Choose crossover MPX or OX------------------------------------------
+        couple = SelectCouple(population,graph,gen)
+        son    = Individual(CrossoverOX(couple, graph)) # Choose crossover MPX or OX------------------------------------------
         population.pop(-i)
-        population.append(MutateNormal(son,graph)) # Choose between Normal or Thrors-----------------------------------
+        population.append(MutateThrors(son,graph)) # Choose between Normal or Thrors-----------------------------------
         i += 1
         
         
@@ -326,18 +333,19 @@ def Main(sizePop,rawGraph,lastBestPath = []):
         Fitness(population,graph)
         #ShowResults(population,i)
         print("Geração: "+ str(i) + ", Best: " + str(population[0]) + ", Worst: " + str(population[-1]) + ". In " +str(int((time.perf_counter() - startTime) / 60))+"m"+str(int((time.perf_counter() - startTime)%60)) +"s" )
-        Reproduce(population,graph)
+        Reproduce(population,graph,i)
         i += 1
         
         #print(np.std(list(map(lambda x: x.score,population))))
-
-        if stdTemp == np.std(list(map(lambda x: x.score,population))):
+        desvioPadrao = np.std(list(map(lambda x: x.score,population)))
+        print("\nDesvio padrão: " + str(desvioPadrao))
+        if stdTemp == desvioPadrao:
             stdCount +=1
             if stdCount >= stdCountRestart:
                 #Main(sizePop,rawGraph,population[0].path)
                 break
         else:
-            stdTemp = np.std(list(map(lambda x: x.score,population)))
+            stdTemp = desvioPadrao
             stdCount = 0
 
 
@@ -345,7 +353,7 @@ def Main(sizePop,rawGraph,lastBestPath = []):
     ShowResults(population,i)
     print ("\nDemorou " +str(int((time.perf_counter() - startTime) / 60)) + " minutos e " + str(int((time.perf_counter() - startTime)%60)) + " segundos e " + str(i) + " gerações.")
     print(population[0].path)
-    print ("\n\n#Best found("+mm+" and "+ rm +")  = Score: "+ str(population[0].score) +", size: "+ str(sizePop) +", kill: "+str(killPop)+", mutationRate: "+str(mutationRate)+", time: "+str(int((time.perf_counter() - startTime) / 60))+"m"+str(int((time.perf_counter() - startTime)%60)) +"s, GenN: "+str(i)+", path: "+str(population[0].path)+" ")
+    print ("\n\n#Best found(Mutation"+mm+" and Reproduction"+ rm +")  = Score: "+ str(population[0].score) +", size: "+ str(sizePop) +", kill: "+str(killPop)+", mutationRate: "+str(mutationRate)+", time: "+str(int((time.perf_counter() - startTime) / 60))+"m"+str(int((time.perf_counter() - startTime)%60)) +"s, GenN: "+str(i)+", path: "+str(population[0].path)+" ")
     playsound('finished.mp3')
     #print(population[2].score)   
 
@@ -473,6 +481,6 @@ mutationRate = 0.02
 
 # Start of code -------------------------------------------
 
-Main(sizePop,graphC)
+Main(sizePop,graphE)
 
 
