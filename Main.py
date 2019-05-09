@@ -4,6 +4,15 @@ import numpy as np
 import time as time
 from playsound import playsound
 
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import time
+
+fig = plt.figure()
+ax1 = fig.add_subplot(1,1,1)
+
+
+
 mm,rm = "", ""
 
 class Individual:
@@ -232,7 +241,7 @@ def SelectCouple(population,graph,gen):
     for i in range(0,len(roullet)):
         roullet[i] = roullet[i] / probSum
     
-    if gen % 10 == 0:
+    if gen % 10 == 11:
         couple.append(np.random.choice(population,2,p=roullet))
         couplef.append(couple[0][0])
         couple.append(np.random.choice(population,2,p=list(reversed(roullet))))
@@ -303,9 +312,20 @@ def Reproduce(population,graph,gen):
         
 def ShowResults(population,n):
     """Shows the results of the poopulation"""
+    if n % 100 == 0:
+        plt.clf()
+
     if n % 10 == 0:
-        print("\nGeneration-----",n,"\nBest ind - ",population[0],"\nWorst ind - ", population[-1])
-        print(population)
+        plt.hist(list(map(lambda i: i.score,population)), density=True, bins='auto')
+        plt.ion()
+        plt.show()
+        plt.pause(0.001)
+        #print("\nGeneration-----",n,"\nBest ind - ",population[0],"\nWorst ind - ", population[-1])
+        #print(population)
+   
+
+
+
 
 
 def Main(sizePop,rawGraph,lastBestPath = []):
@@ -331,7 +351,8 @@ def Main(sizePop,rawGraph,lastBestPath = []):
     while i <= 10000:
  
         Fitness(population,graph)
-        #ShowResults(population,i)
+        ShowResults(population,i)
+        
         print("Geração: "+ str(i) + ", Best: " + str(population[0]) + ", Worst: " + str(population[-1]) + ". In " +str(int((time.perf_counter() - startTime) / 60))+"m"+str(int((time.perf_counter() - startTime)%60)) +"s" )
         Reproduce(population,graph,i)
         i += 1
@@ -355,6 +376,10 @@ def Main(sizePop,rawGraph,lastBestPath = []):
     print(population[0].path)
     print ("\n\n#Best found(Mutation"+mm+" and Reproduction"+ rm +")  = Score: "+ str(population[0].score) +", size: "+ str(sizePop) +", kill: "+str(killPop)+", mutationRate: "+str(mutationRate)+", time: "+str(int((time.perf_counter() - startTime) / 60))+"m"+str(int((time.perf_counter() - startTime)%60)) +"s, GenN: "+str(i)+", path: "+str(population[0].path)+" ")
     playsound('finished.mp3')
+
+    plt.hist(list(map(lambda i: i.score,population)), density=True, bins='auto')
+    plt.show()
+    plt.pause(300)
     #print(population[2].score)   
 
    # print(population)
@@ -482,5 +507,6 @@ mutationRate = 0.02
 # Start of code -------------------------------------------
 
 Main(sizePop,graphE)
+
 
 

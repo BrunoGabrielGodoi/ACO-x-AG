@@ -331,8 +331,23 @@ int main() {
 
 
 
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import time
+
+fig = plt.figure()
+ax1 = fig.add_subplot(1,1,1)
+
+population =  [100,200,300,100,200,300]
+
+def animate(i):
+    i = 0
+    dataArray = population
+    xar = []
+    yar = []
+    plt.hist(population, normed=True, bins=30)
 
 
-
-
-
+ani = animation.FuncAnimation(fig, animate, interval=1000)
+plt.show()
+#pip install plotly --upgrade
