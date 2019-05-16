@@ -101,19 +101,66 @@ def Walk(ants,graphPhero,graphVis):
         i += 1
 
 
-def Main(graph,nAnts):
+
+def AttPheromone(ants,graphPhero,graph,EvaporationRate):
+
+    Evaporate(EvaporationRate,graphPhero)
+
+    for ant in ants:
+        ant.CalculateDistance(graph)
+        graphPhero = ant.AddPheromone(graphPhero,EvaporationRate)
+    
+
+def Evaporate(EvaporationRate,graphPhero):
+
+    for i, line in enumerate(graphPhero):
+        for j,e in enumerate(line):
+            if i == 0 or j == 0:
+                pass
+            else:
+                graphPhero[i][j] = (1- EvaporationRate) * graphPhero[i][j]
+
+
+def GeneratePheromoneGraph(graph):
+    phero = [[1 for x in range(len(graph))] for y in range(len(graph[0]))] 
+   
+    for i in range(len(phero)):
+        for j in range(len(phero[i])):
+            if i == 0:
+                phero[i][j] = j
+            if j == 0:
+                phero[i][j] = i
+    
+    return phero
+
+def Fitness(ants,best):
+
+    for ant in ants:
+        if ant.Distance < best:
+            best = ant.Distance
+
+    return best
+
+
+def Main(graph,nAnts,EvaporationRate):
     graphVis = SetVisibility(graph)
-    graphPhero = [[1 for x in range(len(graph))] for y in range(len(graph[0]))] 
-    ants = GenerateAnts(nAnts,graph)
-    Walk(ants,graphPhero,graphVis)
-    print(ants)
+    graphPhero = GeneratePheromoneGraph(graph)
+    best = 9999
+    for i in range(0,100):
+        ants = GenerateAnts(nAnts,graph)
+        Walk(ants,graphPhero,graphVis)
+        AttPheromone(ants,graphPhero,graph,EvaporationRate)
+        best = Fitness(ants,best)
+        print(str(i) + " " + str(best))
+    
+    print(str(best))
 
 #------------------------Settings-------------------------------------
 
-AntsNumber = 10
+AntsNumber = 1000
+EvaporationRate = 0.5
 
-
-Main(Graphs.graphA,AntsNumber)
+Main(Graphs.graphE,AntsNumber,EvaporationRate)
 
 
 

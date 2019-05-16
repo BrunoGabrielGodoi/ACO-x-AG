@@ -405,7 +405,7 @@ mutationRate = 0.02
 
 # Start of code -------------------------------------------
 
-Main(sizePop,Graphs.graphE)
+Main(sizePop,Graphs.graphA)
 
 
 
