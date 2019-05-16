@@ -7,7 +7,10 @@ class Ants:
         else:
             self.prob[index] = x
         
-
+    def AddPath(self,citie):
+        self.path.append(citie)
+        self.prob.clear()
+        self.visibility[citie] = 0
     
 
     def __init__(self, size, initialCity):

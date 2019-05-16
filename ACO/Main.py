@@ -59,43 +59,54 @@ def GenerateAnts(nAnts,graph):
 
 def CalculateProbability(ants,graphPhero,graphVis):
 
+    
     for ant in ants:
         i = 1
         while i < len(graphPhero):
 
-            if i != ant.path[-1]:
+            if i not in ant.path:#!= ant.path[-1]:
                 ant.SetProb(graphPhero[ant.path[-1]][i] * (graphVis[ant.path[-1]][i] * ant.visibility[i]))
                 i += 1
             else:
+                ant.SetProb(0)
                 i += 1
     
-    sumprob = list(map(lambda x: sum(x.prob),ants))
+    return  list(map(lambda x: sum(x.prob),ants))
+
+    
+def ChoosePath(ants,sumprob,Ncities):
+
+    cities = np.arange(1,Ncities) # Generata an array with 1,2,3...n
 
     for i,ant in enumerate(ants):
 
         for j,e in enumerate(ant.prob): # podia ser qualquer um, só para ter o tamanho do array
-            ant.SetProb(e/sumprob[i],j)
-            
-    cities = np.arange(1,len(graphPhero[0]) - 1)
-    print(sum(ants[0].prob))
-    print(np.random.choice(cities,1,p=ants[0].prob))
+            if e == 0:
+                ant.SetProb(0,j)
+            else:
+                ant.SetProb(e/sumprob[i],j)
+
+        if sum(ant.prob) == 0:
+            ant.AddPath(ant.path[0])
+        else:
+            ant.AddPath(int(np.random.choice(cities,1,p=ant.prob)))
 
 
+def Walk(ants,graphPhero,graphVis):
 
-
-        
-
-
-        
-
+    i = 1
+    while i < len(graphPhero[0]):
+        sumprob = CalculateProbability(ants,graphPhero,graphVis)
+        ChoosePath(ants,sumprob,len(graphPhero[0]))
+        i += 1
 
 
 def Main(graph,nAnts):
     graphVis = SetVisibility(graph)
     graphPhero = [[1 for x in range(len(graph))] for y in range(len(graph[0]))] 
     ants = GenerateAnts(nAnts,graph)
-    CalculateProbability(ants,graphPhero,graphVis)
-    #print(ants)
+    Walk(ants,graphPhero,graphVis)
+    print(ants)
 
 #------------------------Settings-------------------------------------
 
