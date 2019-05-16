@@ -28,6 +28,7 @@ from Ants import Ants as Ants
 #Get MathStuff
 import random
 import numpy as np 
+import time as time
 
 def SetVisibility(graph):
     """We'll use the 1/d expression to calculate this"""
@@ -59,7 +60,6 @@ def GenerateAnts(nAnts,graph):
 
 def CalculateProbability(ants,graphPhero,graphVis):
 
-    
     for ant in ants:
         i = 1
         while i < len(graphPhero):
@@ -74,7 +74,7 @@ def CalculateProbability(ants,graphPhero,graphVis):
     return  list(map(lambda x: sum(x.prob),ants))
 
     
-def ChoosePath(ants,sumprob,Ncities):
+def ChoosePath(ants,sumprob,Ncities,RandomChance):
 
     cities = np.arange(1,Ncities) # Generata an array with 1,2,3...n
 
@@ -88,16 +88,21 @@ def ChoosePath(ants,sumprob,Ncities):
 
         if sum(ant.prob) == 0:
             ant.AddPath(ant.path[0])
+        elif np.random.choice([False,True],1,p=[1-RandomChance,RandomChance]): # 12:25 com
+            i = ant.path[0] # a city already visited for the while 
+            while i in ant.path:
+                i = random.randint(1,Ncities-1)
+            ant.AddPath(i)
         else:
             ant.AddPath(int(np.random.choice(cities,1,p=ant.prob)))
 
 
-def Walk(ants,graphPhero,graphVis):
+def Walk(ants,graphPhero,graphVis,RandomChance):
 
     i = 1
     while i < len(graphPhero[0]):
         sumprob = CalculateProbability(ants,graphPhero,graphVis)
-        ChoosePath(ants,sumprob,len(graphPhero[0]))
+        ChoosePath(ants,sumprob,len(graphPhero[0]),RandomChance)
         i += 1
 
 
@@ -108,7 +113,7 @@ def AttPheromone(ants,graphPhero,graph,EvaporationRate):
 
     for ant in ants:
         ant.CalculateDistance(graph)
-        graphPhero = ant.AddPheromone(graphPhero,EvaporationRate)
+        graphPhero = ant.AddPheromone(graphPhero)
     
 
 def Evaporate(EvaporationRate,graphPhero):
@@ -136,31 +141,37 @@ def GeneratePheromoneGraph(graph):
 def Fitness(ants,best):
 
     for ant in ants:
-        if ant.Distance < best:
-            best = ant.Distance
+        if ant.Distance < best.Distance:
+            best = ant
 
     return best
 
 
-def Main(graph,nAnts,EvaporationRate):
+def Main(graph,nAnts,EvaporationRate,RandomChance):
+    startTime = time.perf_counter()
     graphVis = SetVisibility(graph)
     graphPhero = GeneratePheromoneGraph(graph)
-    best = 9999
-    for i in range(0,100):
+    best = Ants(2,1)
+    best.Distance = 999
+    genN = 0
+    for i in range(0,60):
         ants = GenerateAnts(nAnts,graph)
-        Walk(ants,graphPhero,graphVis)
+        Walk(ants,graphPhero,graphVis,RandomChance)
         AttPheromone(ants,graphPhero,graph,EvaporationRate)
         best = Fitness(ants,best)
-        print(str(i) + " " + str(best))
-    
+        print(str(i) + " " + str(best.Distance))
+        genN = i
+
+    print ("\n\n#Best found(Ants)  = Score: "+ str(best.Distance) +", size: "+ str(AntsNumber) +", EvRate: "+str(EvaporationRate)+", time: "+str(int((time.perf_counter() - startTime) / 60))+"m"+str(int((time.perf_counter() - startTime)%60)) +"s, GenN: "+str(genN)+", path: "+str(best.path)+" ")
     print(str(best))
 
 #------------------------Settings-------------------------------------
 
 AntsNumber = 1000
-EvaporationRate = 0.5
+EvaporationRate = 0.2
+RandomChance = 0.1 
 
-Main(Graphs.graphE,AntsNumber,EvaporationRate)
+Main(Graphs.graphE,AntsNumber,EvaporationRate,RandomChance)
 
 
 

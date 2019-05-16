@@ -30,7 +30,7 @@ class Ants:
             i += 1
         self.Distance = sumD
             
-    def AddPheromone(self,graphPhero,EvaporationRate):
+    def AddPheromone(self,graphPhero):
         val = 1/self.Distance
         
         i = 0

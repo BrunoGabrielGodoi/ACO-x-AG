@@ -331,23 +331,17 @@ int main() {
 
 
 
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import time
+import numpy as np
 
-fig = plt.figure()
-ax1 = fig.add_subplot(1,1,1)
+true = 0
+false = 0
+RandomChance = 0.05
 
-population =  [100,200,300,100,200,300]
+for i in range(0,1000):
 
-def animate(i):
-    i = 0
-    dataArray = population
-    xar = []
-    yar = []
-    plt.hist(population, normed=True, bins=30)
+	if np.random.choice([False,True],1,p=[1-RandomChance,RandomChance]):
+		true += 1
+	else:
+		false += 1
 
-
-ani = animation.FuncAnimation(fig, animate, interval=1000)
-plt.show()
-#pip install plotly --upgrade
+print(str(true) + " " + str(false))
