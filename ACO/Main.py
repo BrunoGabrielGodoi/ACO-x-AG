@@ -7,12 +7,19 @@ What to do:
     -- For each ant:
 
         (X) Choose a not yet visited city until tour is completed
-        ( ) Optimize the tour
-        ( ) Update pheromone Tij += 1/lenght(tour)
+        (X) Optimize the tour
+        (X) Update pheromone Tij += 1/lenght(tour)
 
-    ( ) Evaporate Pheromone Tij = (1-p) * Tij
+    (X) Evaporate Pheromone Tij = (1-p) * Tij
 
 """
+
+#Get lib to make nice plotting hystograns and set them up
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
+fig = plt.figure()
+ax1 = fig.add_subplot(1,1,1)
 
 #Get Graphs form upper folder
 import os,sys,inspect
@@ -146,20 +153,51 @@ def Fitness(ants,best):
 
     return best
 
+def ShowResults(population,n):
+    """Shows the results of the poopulation"""
+    if n % 100 == 0:
+        plt.clf()
+
+    if n % 10 == 0:
+        plt.hist(list(map(lambda i: i.Distance,population)), density=True, bins='auto')
+        plt.ion()
+        plt.show()
+        plt.pause(0.001)
+        #print("\nGeneration-----",n,"\nBest ind - ",population[0],"\nWorst ind - ", population[-1])
+        #print(population)
 
 def Main(graph,nAnts,EvaporationRate,RandomChance):
+
+    stdTemp = 999 # best std
+    stdCount = 0
+    stdCountRestart = 50
+
     startTime = time.perf_counter()
     graphVis = SetVisibility(graph)
     graphPhero = GeneratePheromoneGraph(graph)
     best = Ants(2,1)
-    best.Distance = 999
+    best.Distance = 2000
     genN = 0
-    for i in range(0,60):
+    for i in range(0,9999):
+
         ants = GenerateAnts(nAnts,graph)
         Walk(ants,graphPhero,graphVis,RandomChance)
         AttPheromone(ants,graphPhero,graph,EvaporationRate)
         best = Fitness(ants,best)
-        print(str(i) + " " + str(best.Distance))
+        ShowResults(ants,i)
+
+        desvioPadrao = np.std(list(map(lambda x: x.Distance,ants)))
+        print("\nDesvio padrão: " + str(desvioPadrao))
+        if stdTemp == desvioPadrao:
+            stdCount +=1
+            if stdCount >= stdCountRestart:
+                #Main(sizePop,rawGraph,population[0].path)
+                break
+        else:
+            stdTemp = desvioPadrao
+            stdCount = 0
+
+        print("gen - " + str(i) + " Score: " + str(best.Distance))
         genN = i
 
     print ("\n\n#Best found(Ants)  = Score: "+ str(best.Distance) +", size: "+ str(AntsNumber) +", EvRate: "+str(EvaporationRate)+", time: "+str(int((time.perf_counter() - startTime) / 60))+"m"+str(int((time.perf_counter() - startTime)%60)) +"s, GenN: "+str(genN)+", path: "+str(best.path)+" ")
@@ -167,9 +205,11 @@ def Main(graph,nAnts,EvaporationRate,RandomChance):
 
 #------------------------Settings-------------------------------------
 
-AntsNumber = 1000
-EvaporationRate = 0.2
-RandomChance = 0.1 
+AntsNumber = 500
+EvaporationRate = 0.5
+RandomChance = 0.06 
+
+
 
 Main(Graphs.graphE,AntsNumber,EvaporationRate,RandomChance)
 
